@@ -5,12 +5,16 @@
 replicaCount: 1
 
 image:
-  repository: nginx
-  tag: stable
+  repository: choihongil/ruby
+  tag: v2.6
   pullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
+
+serverPort: 3000
+sourceDir: ""
+sshDir: ""
 
 service:
   type: ClusterIP

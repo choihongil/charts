@@ -30,3 +30,18 @@ Create chart name and version as used by the chart label.
 {{- define "rails.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Create volume mounts block.
+*/}}
+{{- define "rails.volumeMounts" -}}
+volumeMounts:
+  - name: source-volume
+    mountPath: /usr/src/app
+  - name: gem-volume
+    mountPath: /usr/local/bundle
+  - name: ssh-key-volume
+    mountPath: /root/.ssh/id_rsa
+  - name: ssh-known-hosts-volume
+    mountPath: /root/.ssh/known_hosts
+{{- end -}}
