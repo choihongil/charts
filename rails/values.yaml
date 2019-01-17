@@ -2,6 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+applyEnv: "development"
 replicaCount: 1
 
 image:
@@ -14,11 +15,32 @@ fullnameOverride: ""
 
 serverPort: 3000
 sourceDir: ""
+dataDir: ""
 sshDir: ""
 
+env: ""
+secrets: ""
+webpackDevServer:
+  enabled: false
+  port: 3035
+
+# mysql
+mysql:
+  enabled: true
+  mysqlAllowEmptyPassword: true
+  service:
+    type: NodePort
+    nodePort: 3306
+  persistence:
+    size: 1Gi
+
+# postgresql
+postgresql:
+  enabled: false
+
 service:
-  type: ClusterIP
-  port: 80
+  type: NodePort
+  port: 3000
 
 ingress:
   enabled: false

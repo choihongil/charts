@@ -28,20 +28,16 @@ spec:
           hostPath:
             path: {{ .Values.sourceDir }}/vendor/bundle
             type: Directory
-        - name: ssh-key-volume
+        - name: ssh-volume
           hostPath:
-            path: {{ required "A valid sshDir is required" .Values.sshDir }}/id_rsa
-            type: File
-        - name: ssh-known-hosts-volume
-          hostPath:
-            path: {{ .Values.sshDir }}/known_hosts
-            type: File
+            path: {{ required "A valid sshDir is required" .Values.sshDir }}
+            type: Directory
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["rails"]
-          args: ["s", "-p", {{ .Values.serverPort }}, "-b", "0.0.0.0"]
+          args: ["s", "-p", {{ .Values.serverPort | quote }}, "-b", "0.0.0.0"]
           stdin: true
           tty: true
           ports:
@@ -49,6 +45,10 @@ spec:
               containerPort: {{ .Values.serverPort }}
               protocol: TCP
           {{- include "rails.volumeMounts" . | nindent 10 }}
+          {{- if .Values.env }}
+          env:
+            {{- tpl .Values.env . | nindent 12 -}}
+          {{- end }}
           lifecycle:
             postStart:
               exec:
@@ -63,11 +63,27 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.webpackDevServer.enabled }}
+        - name: webpack-dev-server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["bin/webpack-dev-server"]
+          ports:
+            - containerPort: {{ .Values.webpackDevServer.port }}
+          {{- include "rails.volumeMounts" . | nindent 10 }}
+          {{- if .Values.env }}
+          env:
+            {{- tpl .Values.env . | nindent 12 -}}
+          {{- end }}
+        {{- end }}
       initContainers:
         - name: init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: ["sh", "-c", "bundle install && rake db:create && rake db:migrate"]
+          command: ["sh", "-c", {{ include "rails.initCommand" . | quote -}}]
           {{- include "rails.volumeMounts" . | nindent 10 }}
+          {{- if .Values.env }}
+          env:
+            {{- tpl .Values.env . | nindent 12 }}
+          {{- end -}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

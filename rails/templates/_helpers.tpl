@@ -40,8 +40,20 @@ volumeMounts:
     mountPath: /usr/src/app
   - name: gem-volume
     mountPath: /usr/local/bundle
-  - name: ssh-key-volume
-    mountPath: /root/.ssh/id_rsa
-  - name: ssh-known-hosts-volume
-    mountPath: /root/.ssh/known_hosts
+  - name: ssh-volume
+    mountPath: /root/.ssh
+{{- end -}}
+
+{{/*
+Create init command.
+*/}}
+{{- define "rails.initCommand" -}}
+{{- $command := "bundle install" -}}
+{{- if .Values.webpackDevServer.enabled -}}
+{{- $command = printf "%s && yarn install" $command -}}
+{{- end -}}
+{{- if or .Values.mysql.enabled .Values.postgresql.enabled -}}
+{{- $command = printf "%s && rake db:create && rake db:migrate" $command -}}
+{{- end -}}
+{{- $command -}}
 {{- end -}}
