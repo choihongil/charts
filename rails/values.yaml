@@ -18,7 +18,44 @@ sourceDir: ""
 dataDir: ""
 sshDir: ""
 
+# env: |-
+#   - name: DATABASE_USERNAME
+#     value: root
+#   - name: DATABASE_PASSWORD
+#     value: {{ .Values.mysql.mysqlRootPassword }}
+#   - name: DATABASE_HOST
+#     value: {{ .Values.mysql.fullnameOverride }}
+#   - name: AWS_REGION
+#     value: ap-northeast-1
+#   - name: AWS_ACCESS_KEY_ID
+#     valueFrom:
+#       secretKeyRef:
+#         name: aws-secret
+#         key: id
+#   - name: AWS_SECRET_ACCESS_KEY
+#     valueFrom:
+#       secretKeyRef:
+#         name: aws-secret
+#         key: secret
 env: ""
+# secrets: |-
+#   kind: Secret
+#   apiVersion: v1
+#   metadata:
+#     name: google-secret
+#   type: Opaque
+#   data:
+#     key: {{ b64enc "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }}
+#     secret: {{ b64enc "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }}
+#   ---
+#   kind: Secret
+#   apiVersion: v1
+#   metadata:
+#     name: aws-secret
+#   type: Opaque
+#   data:
+#     id: {{ b64enc "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }}
+#     secret: {{ b64enc "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }}
 secrets: ""
 webpackDevServer:
   enabled: false

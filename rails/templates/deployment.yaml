@@ -53,6 +53,7 @@ spec:
             postStart:
               exec:
                 command: ["rm", "-f", "tmp/pids/server.pid"]
+          {{- if ne .Values.applyEnv "development" -}}
           livenessProbe:
             httpGet:
               path: /
@@ -63,6 +64,7 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
         {{- if .Values.webpackDevServer.enabled }}
         - name: webpack-dev-server
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
