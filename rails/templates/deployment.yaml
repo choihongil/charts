@@ -37,12 +37,12 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["rails"]
-          args: ["s", "-p", {{ .Values.serverPort | quote }}, "-b", "0.0.0.0"]
+          args: ["server", "-b", "0.0.0.0"]
           stdin: true
           tty: true
           ports:
             - name: http
-              containerPort: {{ .Values.serverPort }}
+              containerPort: 3000
               protocol: TCP
           {{- include "rails.volumeMounts" . | nindent 10 }}
           {{- if .Values.env }}
@@ -70,7 +70,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: ["bin/webpack-dev-server"]
           ports:
-            - containerPort: {{ .Values.webpackDevServer.port }}
+            - name: webpack
+              containerPort: {{ .Values.webpackDevServer.port }}
           {{- include "rails.volumeMounts" . | nindent 10 }}
           {{- if .Values.env }}
           env:

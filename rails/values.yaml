@@ -13,12 +13,15 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
-serverPort: 3000
 sourceDir: ""
 dataDir: ""
 sshDir: ""
 
 # env: |-
+#   - name: WEBPACKER_DEV_SERVER_HOST
+#     value: 0.0.0.0
+#   - name: WEBPACKER_DEV_SERVER_PUBLIC
+#     value: webpack.domain.test
 #   - name: DATABASE_USERNAME
 #     value: root
 #   - name: DATABASE_PASSWORD
@@ -76,7 +79,7 @@ postgresql:
   enabled: false
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 3000
 
 ingress:
@@ -86,11 +89,15 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   paths: []
   hosts:
-    - chart-example.local
+    - name: admin.domain.test
+      servicePortName: http
+    - name: webpack.domain.test
+      servicePortName: webpack
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
-  #      - chart-example.local
+  #      - admin.domain.test
+  #      - webpack.domain.test
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
