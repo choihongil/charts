@@ -19,14 +19,41 @@ spec:
         app.kubernetes.io/name: {{ include "rails.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      volumes:
+        - name: source-volume
+          hostPath:
+            path: {{ required "A valid sourceDir is required" .Values.sourceDir }}
+            type: Directory
+        - name: gem-volume
+          hostPath:
+            path: {{ .Values.sourceDir }}/vendor/bundle
+            type: Directory
+        - name: ssh-volume
+          hostPath:
+            path: {{ required "A valid sshDir is required" .Values.sshDir }}
+            type: Directory
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["rails"]
+          args: ["server", "-b", "0.0.0.0"]
+          stdin: true
+          tty: true
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 3000
               protocol: TCP
+          {{- include "rails.volumeMounts" . | nindent 10 }}
+          {{- if .Values.env }}
+          env:
+            {{- tpl .Values.env . | nindent 12 -}}
+          {{- end }}
+          lifecycle:
+            postStart:
+              exec:
+                command: ["rm", "-f", "tmp/pids/server.pid"]
+          {{- if ne .Values.applyEnv "development" -}}
           livenessProbe:
             httpGet:
               path: /
@@ -37,6 +64,29 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+        {{- if .Values.webpackDevServer.enabled }}
+        - name: webpack-dev-server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["bin/webpack-dev-server"]
+          ports:
+            - name: webpack
+              containerPort: {{ .Values.webpackDevServer.port }}
+          {{- include "rails.volumeMounts" . | nindent 10 }}
+          {{- if .Values.env }}
+          env:
+            {{- tpl .Values.env . | nindent 12 -}}
+          {{- end }}
+        {{- end }}
+      initContainers:
+        - name: init
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["sh", "-c", {{ include "rails.initCommand" . | quote -}}]
+          {{- include "rails.volumeMounts" . | nindent 10 }}
+          {{- if .Values.env }}
+          env:
+            {{- tpl .Values.env . | nindent 12 }}
+          {{- end -}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

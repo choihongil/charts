@@ -2,19 +2,85 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+applyEnv: "development"
 replicaCount: 1
 
 image:
-  repository: nginx
-  tag: stable
+  repository: choihongil/ruby
+  tag: v2.6
   pullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
 
+sourceDir: ""
+dataDir: ""
+sshDir: ""
+
+# env: |-
+#   - name: WEBPACKER_DEV_SERVER_HOST
+#     value: 0.0.0.0
+#   - name: WEBPACKER_DEV_SERVER_PUBLIC
+#     value: webpack.domain.test
+#   - name: DATABASE_USERNAME
+#     value: root
+#   - name: DATABASE_PASSWORD
+#     value: {{ .Values.mysql.mysqlRootPassword }}
+#   - name: DATABASE_HOST
+#     value: {{ .Values.mysql.fullnameOverride }}
+#   - name: AWS_REGION
+#     value: ap-northeast-1
+#   - name: AWS_ACCESS_KEY_ID
+#     valueFrom:
+#       secretKeyRef:
+#         name: aws-secret
+#         key: id
+#   - name: AWS_SECRET_ACCESS_KEY
+#     valueFrom:
+#       secretKeyRef:
+#         name: aws-secret
+#         key: secret
+env: ""
+# secrets: |-
+#   kind: Secret
+#   apiVersion: v1
+#   metadata:
+#     name: google-secret
+#   type: Opaque
+#   data:
+#     key: {{ b64enc "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }}
+#     secret: {{ b64enc "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }}
+#   ---
+#   kind: Secret
+#   apiVersion: v1
+#   metadata:
+#     name: aws-secret
+#   type: Opaque
+#   data:
+#     id: {{ b64enc "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }}
+#     secret: {{ b64enc "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }}
+secrets: ""
+webpackDevServer:
+  enabled: false
+  port: 3035
+
+# mysql
+mysql:
+  enabled: true
+  mysqlAllowEmptyPassword: true
+  service:
+    type: NodePort
+    nodePort: 3306
+  persistence:
+    size: 1Gi
+
+# postgresql
+postgresql:
+  enabled: false
+
 service:
   type: ClusterIP
-  port: 80
+  port: 3000
 
 ingress:
   enabled: false
@@ -23,11 +89,15 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   paths: []
   hosts:
-    - chart-example.local
+    - name: admin.domain.test
+      servicePortName: http
+    - name: webpack.domain.test
+      servicePortName: webpack
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
-  #      - chart-example.local
+  #      - admin.domain.test
+  #      - webpack.domain.test
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

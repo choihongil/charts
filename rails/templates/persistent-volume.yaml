@@ -1,0 +1,15 @@
+{{- if and (eq .Values.applyEnv "development") (or .Values.mysql.enabled .Values.postgresql.enabled) -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: host-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: {{ required "A valid dataDir is required" .Values.dataDir }}
+    type: Directory
+  {{- end -}}

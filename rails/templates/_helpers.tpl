@@ -30,3 +30,30 @@ Create chart name and version as used by the chart label.
 {{- define "rails.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Create volume mounts block.
+*/}}
+{{- define "rails.volumeMounts" -}}
+volumeMounts:
+  - name: source-volume
+    mountPath: /usr/src/app
+  - name: gem-volume
+    mountPath: /usr/local/bundle
+  - name: ssh-volume
+    mountPath: /root/.ssh
+{{- end -}}
+
+{{/*
+Create init command.
+*/}}
+{{- define "rails.initCommand" -}}
+{{- $command := "bundle install" -}}
+{{- if .Values.webpackDevServer.enabled -}}
+{{- $command = printf "%s && yarn install" $command -}}
+{{- end -}}
+{{- if or .Values.mysql.enabled .Values.postgresql.enabled -}}
+{{- $command = printf "%s && rake db:create && rake db:migrate" $command -}}
+{{- end -}}
+{{- $command -}}
+{{- end -}}

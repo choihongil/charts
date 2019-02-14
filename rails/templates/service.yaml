@@ -14,6 +14,12 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- if .Values.webpackDevServer.enabled }}
+    - port: {{ .Values.webpackDevServer.port }}
+      targetPort: webpack
+      protocol: TCP
+      name: webpack
+    {{- end }}
   selector:
     app.kubernetes.io/name: {{ include "rails.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
